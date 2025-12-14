@@ -60,28 +60,79 @@ bool add(tree* t, int key, const char* value)
 {
 	if (t == NULL) return false;
 
-	node* p = generate(key, value);
-	if (p == NULL) return false;// メモリ確保できなかった。
-
 	if (t->root == NULL) {
-		t->root = p;
-		return true;
+		t->root = generate(key, value);
+		return t->root != NULL;
 	}
 
-	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
+	node* cur = t->root;
 
-	return true;
+	while (1) {
+		if (key < cur->key) {
+			if (cur->left == NULL) {
+				cur->left = generate(key, value);
+				return cur->left != NULL;
+			}
+			cur = cur->left;
+		}
+		else if (key > cur->key) 
+		{
+			if (cur->right == NULL) {
+				cur->right = generate(key, value);
+				return cur->right != NULL;
+			}
+			cur = cur->right;
+		}
+		else 
+		{
+			strcpy_s(cur->value, sizeof(cur->value), value);
+			return true;
+		}
+	}
 }
 
 // keyの値を見てノードを検索して、値を取得する
 const char* find(const tree* t, int key)
 {
-	// ToDo: 実装する
+	if (t == NULL) return NULL;
+
+	node* cur = t->root;
+
+	while (cur != NULL) {
+		if (key < cur->key) {
+			cur = cur->left;
+		}
+		else if (key > cur->key) {
+			cur = cur->right;
+		}
+		else {
+			return cur->value;
+		}
+	}
+
 	return NULL;
+
 }
 
 // keyの小さな順にコールバック関数funcを呼び出す
 void search(const tree* t, void (*func)(const node* p))
 {
-	// ToDo: 実装する
+	if (t == NULL || func == NULL) return;
+
+	node* stack[128];
+	int top = 0;
+	node* cur = t->root;
+
+	while (cur != NULL || top > 0) 
+	{
+		while (cur != NULL) {
+			stack[top++] = cur;
+			cur = cur->left;
+		}
+
+		cur = stack[--top];
+		func(cur);
+
+		cur = cur->right;
+	}
 }
